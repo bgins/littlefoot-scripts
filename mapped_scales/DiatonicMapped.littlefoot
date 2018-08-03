@@ -1,0 +1,64 @@
+/*
+<metadata description="5x5 touch grid with test output on block">
+</metadata>
+*/	
+
+int noteIndex;
+
+void initialise() {
+    clearDisplay();
+    drawPads();
+}
+
+void drawPads() {
+    int cell;
+    for (int i = 0; i < 5; ++i) {
+        for (int j = 0; j < 5; ++j) {
+            cell = j*5+i;
+            if (cell == 20 || cell == 17 || cell == 14 || cell == 1)
+                fillRect (makeARGB (int (0), 0, 0, 100), i*3, j*3, 3, 3);  // octaves
+            else if (cell == 24 || cell == 11 || cell == 8)
+                fillRect (makeARGB (int (0), 10, 0, 30), i*3, j*3, 3, 3);  // fifths
+            else if (cell == 22 || cell == 19 || cell == 6 || cell == 3)
+                fillRect (makeARGB (int (0), 0, 12, 15), i*3, j*3, 3, 3);  // thirds      
+            else
+                fillRect (makeARGB (int (0), 0, 0, 3), i*3, j*3, 3, 3);
+        }
+    }
+}
+
+int getColumn (float x) {
+    if (x < 0.4) return 0;
+    else if (x > 0.4 && x < 0.8) return 1;
+    else if (x > 0.8 && x < 1.2) return 2;
+    else if (x > 1.2 && x < 1.6) return 3;
+    else if (x > 1.6 && x < 2.0) return 4;
+    else return -1;
+}
+
+int getPadNumber (float x, float y) {
+    if (y < 0.4) return getColumn(x) + 20;
+    else if (y > 0.4 && y < 0.8) return 15 + getColumn(x);
+    else if (y > 0.8 && y < 1.2) return 10 + getColumn(x);
+    else if (y > 1.2 && y < 1.6) return 5 + getColumn(x);
+    else if (y > 1.6 && y < 2.0) return getColumn(x);
+    else return -1;
+}
+
+void touchStart (int touchIndex, float x, float y, float z, float vz) {
+    // drawPads();
+    int padNumber = getPadNumber(x, y);
+    // drawNumber (padNumber+60, 0xbbdd9900, 3, 5);
+    // drawNumber (padNumber, 0xbbdd9900, 3, 5);
+    drawNumber (padNumber%7, 0xbbdd9900, 5, 5);
+    // drawNumber (touchIndex, 0xbbdd9900, 3, 5);
+    sendNoteOn(0, padNumber+53, 127);
+    setHeapByte(touchIndex, padNumber);
+}
+
+
+void touchEnd (int touchIndex, float x, float y, float z, float vz) {
+    int padNumber = getHeapByte(touchIndex);
+    sendNoteOff(0, padNumber+53, 0);
+    drawPads();
+}

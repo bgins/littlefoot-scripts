@@ -1,0 +1,29 @@
+/*
+<metadata description="A counterclockwise spinner">
+</metadata>
+*/
+
+int counter;
+int rotation;
+
+void rotate()
+{
+    clearDisplay();
+    if (rotation == 0) {
+        for (int i = 0; i < 15; ++i) { fillPixel (makeARGB (int (0), 10, 100, 10), i, 7); }
+    } else if (rotation == 1) {
+        for (int i = 0; i < 15; ++i) { fillPixel (makeARGB (int (0), 10, 100, 10), i, 14-i); }
+    } else if (rotation == 2) {
+        for (int i = 0; i < 15; ++i) { fillPixel (makeARGB (int (0), 10, 100, 10), 7, i); }
+    } else {
+        for (int i = 0; i < 15; ++i) { fillPixel (makeARGB (int (0), 10, 100, 10), i, i); }
+    }
+    rotation = (rotation + 1) % 4;
+}
+            
+void repaint()
+{
+    counter = (counter + 1) % 24;
+    if (counter % 6 == 0)
+        rotate();
+}

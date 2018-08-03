@@ -1,0 +1,88 @@
+/*
+<metadata description="5x5 note grid with midi note display">
+</metadata>
+*/	
+
+
+//==============================================================================
+// Clear anything left on the display and draw the grid
+//==============================================================================
+void initialise() {
+    clearDisplay();
+    drawPads();
+}
+
+//==============================================================================
+// Draw a 5x5 grid in a checkerboard pattern
+//==============================================================================
+void drawPads() {
+    for (int i = 0; i < 5; ++i) {
+        for (int j = 0; j < 5; ++j) {
+            if ((i+j)%2 == 0)
+                fillRect (makeARGB (int (0), 0, 5, 10), i*3, j*3, 3, 3);
+            else
+                fillRect (makeARGB (int (0), 0, 10, 5), i*3, j*3, 3, 3);
+        }
+    }
+}
+
+//==============================================================================
+/* 
+  touchStart is called when a touch event starts.
+  We do a few things here:
+    - Redraw the pads (to clear debugging overlay)
+    - Determine which pad was pressed using getPadNumber (defined below).
+      The pads are numbered 0-24 starting at the bottom left.
+    - Send a key-down message in the range 60-84 with velocity 127 on channel 0
+    - Store padNumber on the heap at location touchIndex. This allows use to 
+      retrieve the touch later in touchEnd.
+    - Draw the key number sent (debugging overlay)
+*/
+//==============================================================================
+void touchStart (int touchIndex, float x, float y, float z, float vz) {
+    drawPads();
+    int padNumber = getPadNumber(x, y);
+    sendNoteOn(0, padNumber+60, 127);
+    setHeapByte(touchIndex, padNumber);
+    drawNumber (padNumber+60, 0xbbdd9900, 3, 5);
+}
+
+//==============================================================================
+/*
+  touchEnd is called when a touch event ends.
+  The main goal here is to send a key-up message:
+    - Retrieve the padNumber for the touch that has ended from the heap
+    - Send the key-up message to end the note
+    - Redraw the pads (to clear debugging overlay)
+*/
+//==============================================================================
+void touchEnd (int touchIndex, float x, float y, float z, float vz) {
+    int padNumber = getHeapByte(touchIndex);
+    sendNoteOff(0, padNumber+60, 127);
+    drawPads();
+}
+
+
+//==============================================================================
+/*
+  getPadNumber and its helper getColumn determine which pad received a touch.
+  On a Lightpad Block, each side ranges from 0.0 to 2.0. We can logically
+  divide the Block into 0.4x0.4 cells and return a padNumber based on the
+  coordinates of the touch.
+*/
+//==============================================================================
+int getPadNumber (float x, float y) {
+    if (y < 0.4) return getColumn(x) + 20;
+    else if (y > 0.4 && y < 0.8) return 15 + getColumn(x);
+    else if (y > 0.8 && y < 1.2) return 10 + getColumn(x);
+    else if (y > 1.2 && y < 1.6) return 5 + getColumn(x);
+    else return getColumn(x);
+}
+
+int getColumn (float x) {
+    if (x < 0.4) return 0;
+    else if (x > 0.4 && x < 0.8) return 1;
+    else if (x > 0.8 && x < 1.2) return 2;
+    else if (x > 1.2 && x < 1.6) return 3;
+    else return 4;
+}

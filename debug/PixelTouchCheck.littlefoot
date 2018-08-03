@@ -1,0 +1,22 @@
+/*
+<metadata description="Number Grid">
+</metadata>
+*/
+
+int xPixel;
+int yPixel;
+
+void touchStart (int touchIndex, float x, float y, float z, float vz) {
+    xPixel = int (map(x, 0.0, 2.0, 0.0, 15.0));
+    yPixel = int (map(y, 0.0, 2.0, 0.0, 15.0));
+}
+
+void repaint() {
+    clearDisplay();
+    for (int i = 0; i < 15; ++i) { 
+        fillPixel (makeARGB (int (0), 10, 100, 10), i, 0);
+        fillPixel (makeARGB (int (0), 10, 100, 10), 0, i); 
+    }
+    drawNumber (xPixel, 0xbb003333, 6, 4);
+    drawNumber (yPixel, 0xbb003333, 6, 10);
+}
